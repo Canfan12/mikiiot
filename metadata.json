@@ -1,0 +1,6 @@
+{
+  "name": "Smart Home Dashboard",
+  "description": "Interface Web untuk monitoring suhu, kelembaban, dan kontrol relay ESP32/ESP8266.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
