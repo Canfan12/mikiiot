@@ -1,0 +1,41 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+    
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    // Memeriksa autentikasi
+    function isSignedIn() { return request.auth != null; }
+
+    function isValidDevice(data) {
+      return data.keys().hasAll(['temperature', 'humidity', 'relay1', 'relay2', 'relay3', 'relay4', 'lastUpdated'])
+        && data.size() == 7
+        && data.temperature is number
+        && data.humidity is number
+        && data.relay1 is bool
+        && data.relay2 is bool
+        && data.relay3 is bool
+        && data.relay4 is bool
+        && data.lastUpdated is number;
+    }
+
+    match /devices/{deviceId} {
+      // Mengijinkan device dan user yang sudah login (termasuk Anonymous)
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidId(deviceId) && isValidDevice(incoming());
+      allow update: if (
+        isSignedIn() && isValidDevice(incoming()) && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['temperature', 'humidity', 'relay1', 'relay2', 'relay3', 'relay4', 'lastUpdated'])
+        )
+      );
+      allow delete: if false;
+    }
+  }
+}
