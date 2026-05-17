@@ -46,38 +46,44 @@
         <!-- Left Column: Sensors -->
         <div class="w-full md:w-5/12 flex flex-col gap-6 overflow-visible">
             
-            <!-- Sensor Card -->
-            <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex flex-col flex-1 relative overflow-hidden shadow-2xl">
-                <!-- Decorative Glow -->
-                <div class="absolute top-0 right-0 w-32 h-32 bg-[#FF4B2B]/5 rounded-full blur-3xl"></div>
-                <div class="absolute bottom-0 left-0 w-32 h-32 bg-[#00A8E8]/5 rounded-full blur-3xl"></div>
-                
-                <div class="flex justify-between items-center mb-8 relative z-10">
+            <div class="flex flex-col sm:flex-row gap-4 w-full">
+                <!-- Temperature Card -->
+                <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex flex-col flex-1 relative overflow-hidden shadow-2xl">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-[#FF4B2B]/5 rounded-full blur-3xl"></div>
+                    <div class="flex justify-between items-center mb-6 relative z-10 w-full">
+                        <p class="text-[10px] uppercase text-[#8E9299] flex items-center gap-1.5 tracking-wider font-semibold">
+                            <i class="ph ph-thermometer text-[#FF4B2B] text-sm"></i> Temperature
+                        </p>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-4xl lg:text-5xl font-light text-white tracking-tight"><span id="temp-val">--</span><span class="text-2xl text-[#8E9299] ml-1">°C</span></h3>
+                    </div>
+                </div>
+
+                <!-- Humidity Card -->
+                <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex flex-col flex-1 relative overflow-hidden shadow-2xl">
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-[#00A8E8]/5 rounded-full blur-3xl"></div>
+                    <div class="flex justify-between items-center mb-6 relative z-10 w-full">
+                        <p class="text-[10px] uppercase text-[#8E9299] flex items-center gap-1.5 tracking-wider font-semibold">
+                            <i class="ph ph-drop text-[#00A8E8] text-sm"></i> Humidity
+                        </p>
+                    </div>
+                    <div class="relative z-10">
+                        <h3 class="text-4xl lg:text-5xl font-light text-white tracking-tight"><span id="hum-val">--</span><span class="text-2xl text-[#8E9299] ml-1">%</span></h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chart Card -->
+            <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex flex-col relative overflow-hidden shadow-2xl min-h-[220px]">
+                <div class="flex justify-between items-center mb-4 relative z-10">
                     <h2 class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E9299] flex items-center gap-2">
-                        <i class="ph ph-activity text-base text-[#00A8E8]"></i> Environment Monitor
+                        <i class="ph ph-activity text-base text-[#00A8E8]"></i> Realtime History
                     </h2>
                     <span class="text-[10px] bg-[#2A2D31] px-2.5 py-1 rounded-md text-white font-mono border border-[#3A3D41]">DHT11 (PIN 4)</span>
                 </div>
                 
-                <div class="space-y-10 flex-1 relative z-10 w-full overflow-hidden">
-                    <!-- Temperature -->
-                    <div class="flex items-end justify-between border-b border-[#2A2D31] pb-6">
-                        <div>
-                            <p class="text-[10px] uppercase text-[#8E9299] mb-1.5 flex items-center gap-1.5 tracking-wider"><i class="ph ph-thermometer text-[#FF4B2B]"></i> Temperature</p>
-                            <h3 class="text-6xl font-light text-white tracking-tight"><span id="temp-val">--</span><span class="text-3xl text-[#8E9299] ml-1">°C</span></h3>
-                        </div>
-                    </div>
-
-                    <!-- Humidity -->
-                    <div class="flex items-end justify-between border-b border-[#2A2D31] pb-6">
-                        <div>
-                            <p class="text-[10px] uppercase text-[#8E9299] mb-1.5 flex items-center gap-1.5 tracking-wider"><i class="ph ph-drop text-[#00A8E8]"></i> Humidity</p>
-                            <h3 class="text-6xl font-light text-white tracking-tight"><span id="hum-val">--</span><span class="text-3xl text-[#8E9299] ml-1">%</span></h3>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 w-full h-[120px] relative z-10">
+                <div class="mt-2 w-full h-[150px] relative z-10">
                     <canvas id="sensorChart"></canvas>
                 </div>
             </div>
@@ -104,12 +110,12 @@
                 </div>
             </div>
 
-            <!-- Telegram Log -->
-            <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex-1 flex flex-col min-h-[200px] shadow-2xl relative">
-                <h2 class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E9299] mb-4 flex items-center gap-2">
-                    <i class="ph ph-terminal-window text-[#E0E0E0]"></i> Telegram Event Log
+            <!-- System Log -->
+            <div class="bg-[#16191D] border border-[#2A2D31] rounded-lg p-5 sm:p-6 flex-1 flex flex-col min-h-[200px] shadow-2xl relative">
+                <h2 class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E9299] mb-4">
+                    System Command Log (Web)
                 </h2>
-                <div id="log-container" class="font-mono text-[10px] sm:text-[11px] space-y-3 flex-1 overflow-y-auto leading-relaxed pr-2">
+                <div id="log-container" class="font-mono text-[10px] sm:text-[11px] space-y-2 flex-1 overflow-y-auto leading-relaxed pr-2">
                     <!-- Logs injected via JS -->
                 </div>
             </div>

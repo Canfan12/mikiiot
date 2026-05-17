@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/[...route]"
+    },
+    {
+      "source": "/dht",
+      "destination": "/api/[...route]"
+    },
+    {
+      "source": "/dht/history",
+      "destination": "/api/[...route]"
+    },
+    {
+      "source": "/relay/:match*",
+      "destination": "/api/[...route]"
+    },
+    {
+      "source": "/relays",
+      "destination": "/api/[...route]"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

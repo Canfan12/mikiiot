@@ -296,3 +296,4 @@ const app = {
 window.addEventListener('DOMContentLoaded', () => {
     app.init();
 });
+window.app = app;
