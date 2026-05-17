@@ -44,7 +44,7 @@ const sendTelegramMessage = async (text: string) => {
 };
 
 // DHT Endpoint
-app.get('/api/dht', (req, res) => {
+const dhtHandler = (req, res) => {
   // simulate reading from esp32 by adding noise
   currentTemp = +(currentTemp + (Math.random() * 0.4 - 0.2)).toFixed(1);
   currentHumidity = Math.min(100, Math.max(0, +(currentHumidity + (Math.random() * 2 - 1)).toFixed(0)));
@@ -61,14 +61,20 @@ app.get('/api/dht', (req, res) => {
     humidity: currentHumidity,
     lastUpdated: Date.now()
   });
-});
+};
 
-app.get('/api/dht/history', (req, res) => {
+app.get('/api/dht', dhtHandler);
+app.get('/dht', dhtHandler);
+
+const dhtHistoryHandler = (req, res) => {
   res.json(history);
-});
+};
+
+app.get('/api/dht/history', dhtHistoryHandler);
+app.get('/dht/history', dhtHistoryHandler);
 
 // Relay Switch Endpoints
-app.get('/api/relay/:id/:state', async (req, res) => {
+const relayHandler = async (req, res) => {
   const idStr = req.params.id;
   const stateStr = req.params.state;
   
@@ -94,12 +100,17 @@ app.get('/api/relay/:id/:state', async (req, res) => {
   } else {
     res.status(400).json({ success: false, message: 'Invalid Relay ID' });
   }
-});
+};
+
+app.get('/api/relay/:id/:state', relayHandler);
+app.get('/relay/:id/:state', relayHandler);
 
 // get all relays status
-app.get('/api/relays', (req, res) => {
-  console.log("HIT /api/relays endpoint");
+const relaysHandler = (req, res) => {
   res.json({ relays });
-});
+};
+
+app.get('/api/relays', relaysHandler);
+app.get('/relays', relaysHandler);
 
 export default app;

@@ -177,6 +177,9 @@ const app = {
         this.showToast(`Requesting Relay ${id} to turn ${state.toUpperCase()}...`, 'info');
         try {
             const res = await fetch(`/api/relay/${id}/${state}`);
+            if (!res.ok) {
+                throw new Error(`Failed with status ${res.status}`);
+            }
             const data = await res.json();
             
             if (data.success) {
@@ -189,6 +192,7 @@ const app = {
             }
         } catch (err) {
             this.showToast('Failed to connect to backend', 'error');
+            console.error(err);
         }
     },
     
@@ -199,13 +203,17 @@ const app = {
         try {
             // Process sequentially to not overload backend
             for (let i = 1; i <= 4; i++) {
-                await fetch(`/api/relay/${i}/${stateStr}`);
+                const response = await fetch(`/api/relay/${i}/${stateStr}`);
+                if (!response.ok) {
+                    throw new Error(`Failed with status ${response.status}`);
+                }
             }
             this.showToast(`All relays set to ${stateStr.toUpperCase()}`, 'success');
             this.addLog(`User triggered Emergency All ${stateStr.toUpperCase()}`);
             this.fetchRelayStatus();
         } catch (err) {
             this.showToast('Failed to trigger all relays', 'error');
+            console.error(err);
         }
     },
 
