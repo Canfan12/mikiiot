@@ -1,13 +1,131 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Google AI Studio App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Home Dashboard</title>
+    <!-- Tailwind CSS (CDN for simple vanilla usage) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio,line-clamp"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Phosphor Icons (Alternative to Lucide for easy CDN usage) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-[#0F1113] text-[#E0E0E0] font-sans antialiased h-screen overflow-hidden flex flex-col">
+    <!-- Header -->
+    <header class="p-4 md:p-6 border-b border-[#2A2D31] flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shrink-0">
+        <div>
+            <h1 class="text-xs font-bold tracking-[0.2em] text-[#8E9299] uppercase">IoT Infrastructure / Node-01</h1>
+            <div class="text-xl sm:text-2xl font-light mt-1 flex items-center md:items-start tracking-wide">
+                ESP32 Smart Home Interface 
+                <span id="connection-status" class="text-[#00FF41] text-[10px] sm:text-xs align-top ml-3 flex items-center bg-[#00FF41]/10 px-2 py-0.5 rounded-full border border-[#00FF41]/20">
+                    <span class="w-1.5 h-1.5 bg-[#00FF41] rounded-full mr-1.5 animate-pulse"></span> ONLINE
+                </span>
+            </div>
+        </div>
+        <div class="flex gap-4 sm:gap-8 text-left sm:text-right flex-wrap items-center">
+            <div class="flex flex-col">
+                <span class="text-[10px] uppercase text-[#8E9299] tracking-wider">Network SSID</span>
+                <span class="font-mono text-xs sm:text-sm text-[#E0E0E0]">miki</span>
+            </div>
+            <div class="flex flex-col text-left sm:text-right">
+                <span class="text-[10px] uppercase text-[#8E9299] tracking-wider">Telegram Bot</span>
+                <span id="telegram-status" class="font-mono text-xs sm:text-sm text-[#00FF41] flex items-center gap-1.5">
+                    <i class="ph ph-telegram-logo text-base"></i> @Active_Relay_Bot
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 min-h-0 overflow-y-auto md:overflow-hidden flex flex-col md:flex-row gap-6">
+        
+        <!-- Left Column: Sensors -->
+        <div class="w-full md:w-5/12 flex flex-col gap-6 overflow-visible">
+            
+            <!-- Sensor Card -->
+            <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex flex-col flex-1 relative overflow-hidden shadow-2xl">
+                <!-- Decorative Glow -->
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[#FF4B2B]/5 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-[#00A8E8]/5 rounded-full blur-3xl"></div>
+                
+                <div class="flex justify-between items-center mb-8 relative z-10">
+                    <h2 class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E9299] flex items-center gap-2">
+                        <i class="ph ph-activity text-base text-[#00A8E8]"></i> Environment Monitor
+                    </h2>
+                    <span class="text-[10px] bg-[#2A2D31] px-2.5 py-1 rounded-md text-white font-mono border border-[#3A3D41]">DHT11 (PIN 4)</span>
+                </div>
+                
+                <div class="space-y-10 flex-1 relative z-10 w-full overflow-hidden">
+                    <!-- Temperature -->
+                    <div class="flex items-end justify-between border-b border-[#2A2D31] pb-6">
+                        <div>
+                            <p class="text-[10px] uppercase text-[#8E9299] mb-1.5 flex items-center gap-1.5 tracking-wider"><i class="ph ph-thermometer text-[#FF4B2B]"></i> Temperature</p>
+                            <h3 class="text-6xl font-light text-white tracking-tight"><span id="temp-val">--</span><span class="text-3xl text-[#8E9299] ml-1">°C</span></h3>
+                        </div>
+                    </div>
+
+                    <!-- Humidity -->
+                    <div class="flex items-end justify-between border-b border-[#2A2D31] pb-6">
+                        <div>
+                            <p class="text-[10px] uppercase text-[#8E9299] mb-1.5 flex items-center gap-1.5 tracking-wider"><i class="ph ph-drop text-[#00A8E8]"></i> Humidity</p>
+                            <h3 class="text-6xl font-light text-white tracking-tight"><span id="hum-val">--</span><span class="text-3xl text-[#8E9299] ml-1">%</span></h3>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6 w-full h-[120px] relative z-10">
+                    <canvas id="sensorChart"></canvas>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Right Column: Control & Logs -->
+        <div class="w-full md:w-7/12 flex flex-col gap-6 overflow-visible md:overflow-hidden">
+            <!-- Relays Grid -->
+            <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 shrink-0 shadow-2xl relative">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E9299] flex items-center gap-2">
+                        <i class="ph ph-lightning text-[#00FF41]"></i> Power Management (4-Channel)
+                    </h2>
+                    <div class="flex gap-2 w-full sm:w-auto">
+                        <button onclick="app.setAllRelays(true)" class="flex-1 sm:flex-none text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-[#1A1D21] hover:bg-[#2A2D31] border border-[#2A2D31] text-white px-3 py-1.5 rounded transition-colors">All ON</button>
+                        <button onclick="app.setAllRelays(false)" class="flex-1 sm:flex-none text-[10px] sm:text-xs font-bold uppercase tracking-wider bg-[#FF4B2B]/20 hover:bg-[#FF4B2B]/30 border border-[#FF4B2B]/50 text-[#FF4B2B] px-3 py-1.5 rounded transition-colors">All OFF</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    <!-- Relay Cards Generated via JS -->
+                    <div id="relays-container" class="col-span-1 xl:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+                </div>
+            </div>
+
+            <!-- Telegram Log -->
+            <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-5 sm:p-6 flex-1 flex flex-col min-h-[200px] shadow-2xl relative">
+                <h2 class="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-[#8E9299] mb-4 flex items-center gap-2">
+                    <i class="ph ph-terminal-window text-[#E0E0E0]"></i> Telegram Event Log
+                </h2>
+                <div id="log-container" class="font-mono text-[10px] sm:text-[11px] space-y-3 flex-1 overflow-y-auto leading-relaxed pr-2">
+                    <!-- Logs injected via JS -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="p-4 border-t border-[#2A2D31] flex justify-between items-center text-[10px] text-[#8E9299] uppercase tracking-widest shrink-0 font-mono">
+        <div class="hidden sm:block" id="realtime-clock">00:00:00</div>
+        <div>Backend Sync: <span id="sync-status" class="text-[#E0E0E0]">Initializing...</span></div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-6 top-auto md:top-24 md:bottom-auto right-4 md:right-6 flex flex-col gap-3 z-50 pointer-events-none"></div>
+
+    <script type="module" src="/app.js"></script>
+</body>
 </html>
 
