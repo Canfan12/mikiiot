@@ -97,8 +97,30 @@ const dhtHandler = (req, res) => {
   });
 };
 
+const postDhtHandler = (req, res) => {
+  const { temperature, humidity } = req.body || {};
+  if (temperature !== undefined && humidity !== undefined) {
+    currentTemp = parseFloat(temperature);
+    currentHumidity = parseFloat(humidity);
+    
+    if (history.length > 30) history.shift();
+    history.push({
+      time: new Date().toISOString(),
+      temperature: currentTemp.toFixed(1),
+      humidity: currentHumidity.toFixed(0)
+    });
+    
+    res.json({ success: true, temperature: currentTemp, humidity: currentHumidity });
+  } else {
+    res.status(400).json({ success: false, message: "Missing temperature or humidity" });
+  }
+};
+
 app.get('/api/dht', dhtHandler);
 app.get('/dht', dhtHandler);
+
+app.post('/api/dht', postDhtHandler);
+app.post('/dht', postDhtHandler);
 
 const dhtHistoryHandler = (req, res) => {
   res.json(history);
@@ -117,11 +139,6 @@ const relayHandler = async (req, res) => {
     relays = [isON, isON, isON, isON];
     saveState({ relays });
     
-    // Command format requested by user
-    const msg = `=== CONTROL RELAY ===\n/all_${isON ? 'on' : 'off'} -> Semua Relay ${isON ? 'ON' : 'OFF'}`;
-    
-    await sendTelegramMessage(msg);
-    
     return res.json({
       success: true,
       relay: 'all',
@@ -137,11 +154,6 @@ const relayHandler = async (req, res) => {
     const isON = (stateStr === 'on');
     relays[idx] = isON;
     saveState({ relays });
-    
-    // Command format requested by user
-    const msg = `=== CONTROL RELAY ===\n/r${idx + 1}_${isON ? 'on' : 'off'} -> Relay ${idx + 1} ${isON ? 'ON' : 'OFF'}`;
-    
-    await sendTelegramMessage(msg);
     
     const labels = ['Lampu Teras', 'Lampu Tengah', 'Variasi 1', 'Variasi 2'];
     return res.json({
@@ -171,7 +183,7 @@ app.get('/relays', relaysHandler);
 const logHandler = async (req, res) => {
   const { message } = req.body;
   if (message) {
-    await sendTelegramMessage(`[System Log] ${message}`);
+    await sendTelegramMessage(`=== CONTROL RELAY ===\n${message}`);
   }
   res.json({ success: true });
 };
