@@ -217,12 +217,9 @@ const app = {
         this.showToast(`Turning ALL relays ${stateStr.toUpperCase()}...`, 'info');
         
         try {
-            // Process sequentially to not overload backend
-            for (let i = 1; i <= 4; i++) {
-                const response = await fetch(`/api/relay/${i}/${stateStr}`);
-                if (!response.ok) {
-                    throw new Error(`Failed with status ${response.status}`);
-                }
+            const response = await fetch(`/api/relay/all/${stateStr}`);
+            if (!response.ok) {
+                throw new Error(`Failed with status ${response.status}`);
             }
             this.showToast(`All relays set to ${stateStr.toUpperCase()}`, 'success');
             this.addLog(`User triggered Emergency All ${stateStr.toUpperCase()}`);

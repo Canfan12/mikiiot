@@ -112,6 +112,23 @@ const relayHandler = async (req, res) => {
   const idStr = req.params.id;
   const stateStr = req.params.state;
   
+  if (idStr === 'all') {
+    const isON = (stateStr === 'on');
+    relays = [isON, isON, isON, isON];
+    saveState({ relays });
+    
+    const msg = `/all_${isON ? 'on' : 'off'}`;
+    await sendTelegramMessage(msg);
+    
+    return res.json({
+      success: true,
+      relay: 'all',
+      name: 'Semua Relay',
+      state: isON ? 'ON' : 'OFF',
+      relays: relays
+    });
+  }
+  
   const idx = parseInt(idStr) - 1;
   
   if (idx >= 0 && idx < 4) {
@@ -125,7 +142,7 @@ const relayHandler = async (req, res) => {
     await sendTelegramMessage(msg);
     
     const labels = ['Lampu Teras', 'Lampu Tengah', 'Variasi 1', 'Variasi 2'];
-    res.json({
+    return res.json({
       success: true,
       relay: idx + 1,
       name: labels[idx],
@@ -133,7 +150,7 @@ const relayHandler = async (req, res) => {
       relays: relays
     });
   } else {
-    res.status(400).json({ success: false, message: 'Invalid Relay ID' });
+    return res.status(400).json({ success: false, message: 'Invalid Relay ID' });
   }
 };
 
