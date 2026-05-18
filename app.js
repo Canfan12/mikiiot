@@ -200,7 +200,7 @@ const app = {
             
             if (data.success) {
                 this.showToast(`Relay ${id} is now ${state.toUpperCase()}`, 'success');
-                this.addLog(`User requested Relay ${id} -> ${state.toUpperCase()}`);
+                this.addLog(`/r${id}_${state.toLowerCase()} -> Relay ${id} ${state.toUpperCase()}`);
                 this.relays = data.relays;
                 this.renderRelays();
             } else {
@@ -222,7 +222,7 @@ const app = {
                 throw new Error(`Failed with status ${response.status}`);
             }
             this.showToast(`All relays set to ${stateStr.toUpperCase()}`, 'success');
-            this.addLog(`User triggered Emergency All ${stateStr.toUpperCase()}`);
+            this.addLog(`/all_${stateStr.toLowerCase()} -> Semua Relay ${stateStr.toUpperCase()}`);
             this.fetchRelayStatus();
         } catch (err) {
             this.showToast('Failed to trigger all relays', 'error');
@@ -249,13 +249,6 @@ const app = {
         if (container.children.length > 50) {
             container.removeChild(container.lastChild);
         }
-
-        // Forward to telegram backend without awaiting
-        fetch('/api/telegram/log', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message: msg })
-        }).catch(err => console.error("Failed to forward log UI -> Telegram", err));
     },
 
     showToast(message, type = 'info') {

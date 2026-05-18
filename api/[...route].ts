@@ -117,7 +117,9 @@ const relayHandler = async (req, res) => {
     relays = [isON, isON, isON, isON];
     saveState({ relays });
     
-    const msg = `/all_${isON ? 'on' : 'off'}`;
+    // Command format requested by user
+    const msg = `=== CONTROL RELAY ===\n/all_${isON ? 'on' : 'off'} -> Semua Relay ${isON ? 'ON' : 'OFF'}`;
+    
     await sendTelegramMessage(msg);
     
     return res.json({
@@ -137,7 +139,7 @@ const relayHandler = async (req, res) => {
     saveState({ relays });
     
     // Command format requested by user
-    const msg = `/r${idx + 1}_${isON ? 'on' : 'off'}`;
+    const msg = `=== CONTROL RELAY ===\n/r${idx + 1}_${isON ? 'on' : 'off'} -> Relay ${idx + 1} ${isON ? 'ON' : 'OFF'}`;
     
     await sendTelegramMessage(msg);
     
@@ -169,7 +171,7 @@ app.get('/relays', relaysHandler);
 const logHandler = async (req, res) => {
   const { message } = req.body;
   if (message) {
-    await sendTelegramMessage(`[Log] ${message}`);
+    await sendTelegramMessage(`[System Log] ${message}`);
   }
   res.json({ success: true });
 };
