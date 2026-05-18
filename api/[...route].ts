@@ -176,8 +176,22 @@ const relaysHandler = (req, res) => {
   res.json({ relays });
 };
 
+const updateRelaysHandler = (req, res) => {
+  const { relays: newRelays } = req.body || {};
+  if (Array.isArray(newRelays) && newRelays.length === 4) {
+    relays = newRelays;
+    saveState({ relays });
+    res.json({ success: true, relays });
+  } else {
+    res.status(400).json({ success: false, message: 'Invalid relays array' });
+  }
+};
+
 app.get('/api/relays', relaysHandler);
 app.get('/relays', relaysHandler);
+
+app.post('/api/relays', updateRelaysHandler);
+app.post('/relays', updateRelaysHandler);
 
 // System Log Endpoint
 const logHandler = async (req, res) => {
