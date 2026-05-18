@@ -165,4 +165,15 @@ const relaysHandler = (req, res) => {
 app.get('/api/relays', relaysHandler);
 app.get('/relays', relaysHandler);
 
+// System Log Endpoint
+const logHandler = async (req, res) => {
+  const { message } = req.body;
+  if (message) {
+    await sendTelegramMessage(`[Log] ${message}`);
+  }
+  res.json({ success: true });
+};
+
+app.post('/api/telegram/log', logHandler);
+
 export default app;

@@ -249,6 +249,13 @@ const app = {
         if (container.children.length > 50) {
             container.removeChild(container.lastChild);
         }
+
+        // Forward to telegram backend without awaiting
+        fetch('/api/telegram/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg })
+        }).catch(err => console.error("Failed to forward log UI -> Telegram", err));
     },
 
     showToast(message, type = 'info') {
