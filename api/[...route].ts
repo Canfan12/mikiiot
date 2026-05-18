@@ -26,7 +26,7 @@ function loadState() {
   } catch (e) {
     console.error("Error loading state", e);
   }
-  return { relays: [false, false, false, false] };
+  return { state: [false, false, false, false], request: [false, false, false, false], hasRequest: false };
 }
 
 // Helper to save state
@@ -39,8 +39,12 @@ function saveState(state) {
 }
 
 // Mock state
-let state = loadState();
-let relays = state.relays;
+let dbData = loadState();
+// Fallback for old db structure
+let relayState = dbData.state || (dbData.relays ? [...dbData.relays] : [false, false, false, false]);
+let relayRequest = dbData.request || (dbData.relays ? [...dbData.relays] : [false, false, false, false]);
+let hasRequest = dbData.hasRequest || false;
+
 let lastUpdated = Date.now();
 let currentTemp = 28.5;
 let currentHumidity = 65;
@@ -136,15 +140,16 @@ const relayHandler = async (req, res) => {
   
   if (idStr === 'all') {
     const isON = (stateStr === 'on');
-    relays = [isON, isON, isON, isON];
-    saveState({ relays });
+    relayRequest = [isON, isON, isON, isON];
+    hasRequest = true;
+    saveState({ state: relayState, request: relayRequest, hasRequest });
     
     return res.json({
       success: true,
       relay: 'all',
       name: 'Semua Relay',
       state: isON ? 'ON' : 'OFF',
-      relays: relays
+      relays: relayState
     });
   }
   
@@ -152,8 +157,9 @@ const relayHandler = async (req, res) => {
   
   if (idx >= 0 && idx < 4) {
     const isON = (stateStr === 'on');
-    relays[idx] = isON;
-    saveState({ relays });
+    relayRequest[idx] = isON;
+    hasRequest = true;
+    saveState({ state: relayState, request: relayRequest, hasRequest });
     
     const labels = ['Lampu Teras', 'Lampu Tengah', 'Variasi 1', 'Variasi 2'];
     return res.json({
@@ -161,7 +167,7 @@ const relayHandler = async (req, res) => {
       relay: idx + 1,
       name: labels[idx],
       state: isON ? 'ON' : 'OFF',
-      relays: relays
+      relays: relayState
     });
   } else {
     return res.status(400).json({ success: false, message: 'Invalid Relay ID' });
@@ -173,18 +179,28 @@ app.get('/relay/:id/:state', relayHandler);
 
 // get all relays status
 const relaysHandler = (req, res) => {
-  res.json({ relays });
+  res.json({ relays: relayState, state: relayState, request: relayRequest, hasRequest });
 };
 
 const updateRelaysHandler = (req, res) => {
-  const { relays: newRelays } = req.body || {};
-  if (Array.isArray(newRelays) && newRelays.length === 4) {
-    relays = newRelays;
-    saveState({ relays });
-    res.json({ success: true, relays });
-  } else {
-    res.status(400).json({ success: false, message: 'Invalid relays array' });
+  const { relays: newRelays, state: newState, request: newRequest, hasRequest: newHasRequest } = req.body || {};
+  
+  if (Array.isArray(newState)) {
+    relayState = newState;
+  } else if (Array.isArray(newRelays)) {
+    relayState = newRelays;
   }
+  
+  if (Array.isArray(newRequest)) {
+    relayRequest = newRequest;
+  }
+  
+  if (newHasRequest !== undefined) {
+    hasRequest = newHasRequest;
+  }
+
+  saveState({ state: relayState, request: relayRequest, hasRequest });
+  res.json({ success: true, relays: relayState, state: relayState, request: relayRequest, hasRequest });
 };
 
 app.get('/api/relays', relaysHandler);
