@@ -23,11 +23,18 @@ async function startServer() {
     });
     app.use(vite.middlewares);
   } else {
-    // Serve static files from root directory assuming we have index.html, style.css, app.js
-    // or from a "public" folder. Let's serve static from current working directory
-    // as we will place index.html directly.
-    app.use(express.static(process.cwd()));
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
   }
+
+  // Error handler to prevent HTML 500 responses for API
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error(err.stack);
+    res.status(500).json({ error: err.message || "Internal Server Error" });
+  });
 
   app.listen(PORT, "0.0.0.0", () => {
     console.log(`Server running on http://localhost:${PORT}`);

@@ -119,8 +119,8 @@ const relayHandler = async (req, res) => {
     relays[idx] = isON;
     saveState({ relays });
     
-    // Command format widely used in simple Telegram ESP32 bots
-    const msg = `/relay${idx + 1}_${isON ? 'on' : 'off'}`;
+    // Command format requested by user
+    const msg = `/r${idx + 1}_${isON ? 'on' : 'off'}`;
     
     await sendTelegramMessage(msg);
     

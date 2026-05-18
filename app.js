@@ -78,6 +78,10 @@ const app = {
     async fetchDhtHistoryData() {
         try {
             const res = await fetch('/api/dht/history');
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Received non-JSON response");
+            }
             const data = await res.json();
             
             const labels = data.map(d => new Date(d.time).toLocaleTimeString());
@@ -102,6 +106,10 @@ const app = {
     async fetchDhtData() {
         try {
             const res = await fetch('/api/dht');
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Received non-JSON response");
+            }
             const data = await res.json();
             
             document.getElementById('temp-val').innerText = data.temperature.toFixed(1);
@@ -132,13 +140,17 @@ const app = {
     async fetchRelayStatus() {
         try {
             const res = await fetch('/api/relays');
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Received non-JSON response");
+            }
             const data = await res.json();
             if(data.relays) {
                 this.relays = data.relays;
                 this.renderRelays();
             }
         } catch (err) {
-            console.error("Error fetching relay status", err);
+            console.error("Error fetching relay status:", err.message || err);
         }
     },
 
@@ -179,6 +191,10 @@ const app = {
             const res = await fetch(`/api/relay/${id}/${state}`);
             if (!res.ok) {
                 throw new Error(`Failed with status ${res.status}`);
+            }
+            const contentType = res.headers.get("content-type");
+            if (!contentType || !contentType.includes("application/json")) {
+                throw new TypeError("Received non-JSON response");
             }
             const data = await res.json();
             
