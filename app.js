@@ -146,8 +146,10 @@ const app = {
             }
             const data = await res.json();
             if(data.relays) {
-                this.relays = data.relays;
-                this.renderRelays();
+                if (JSON.stringify(this.relays) !== JSON.stringify(data.relays)) {
+                    this.relays = data.relays;
+                    this.renderRelays();
+                }
             }
         } catch (err) {
             console.error("Error fetching relay status:", err.message || err);

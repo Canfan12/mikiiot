@@ -105,12 +105,17 @@ void ambilStatusRelayDariWeb() {
     // Serial.println("[WEB GET] " + payload);
 
     DynamicJsonDocument doc(1024);
-    deserializeJson(doc, payload);
+    DeserializationError error = deserializeJson(doc, payload);
 
-    setRelay(relay1, (bool)doc["relays"][0]);
-    setRelay(relay2, (bool)doc["relays"][1]);
-    setRelay(relay3, (bool)doc["relays"][2]);
-    setRelay(relay4, (bool)doc["relays"][3]);
+    if (!error) {
+      setRelay(relay1, (bool)doc["relays"][0]);
+      setRelay(relay2, (bool)doc["relays"][1]);
+      setRelay(relay3, (bool)doc["relays"][2]);
+      setRelay(relay4, (bool)doc["relays"][3]);
+    } else {
+      Serial.print("[WEB GET] JSON Parse Error: ");
+      Serial.println(error.c_str());
+    }
 
   } else {
     Serial.print("[WEB GET] Error HTTP: ");
@@ -152,14 +157,17 @@ void pushDhtKeWeb() {
 // =====================================================
 // UPDATE RELAY KE CLOUD (jika kontrol via Telegram)
 // =====================================================
-// Memanggil /api/telegram/log untuk sinkronisasi state atau log
-void pushStateKeWeb(String stateMsg) {
+void updateWebRelay(String actionPath) {
   if (WiFi.status() != WL_CONNECTED) return;
   HTTPClient http;
-  http.begin(webLogUrl);
-  http.addHeader("Content-Type", "application/json");
-  String jsonBody = "{\"message\":\"" + stateMsg + "\"}";
-  http.POST(jsonBody);
+  
+  // Ambil URL dasar, misal: https://<YOUR_APP_URL>/api
+  String baseUrl = String(webApiUrl);
+  baseUrl.replace("/relays", ""); // Hapus /relays di belakangnya
+  
+  // Gabung: https://<YOUR_APP_URL>/api/relay/1/on
+  http.begin(baseUrl + actionPath);
+  http.GET();
   http.end();
 }
 
@@ -198,24 +206,26 @@ void handleNewMessages(int numNewMessages) {
       bot.sendMessage(chat_id, welcome, "");
     }
     // RELAY 1
-    else if (text == "/r1_on")  { setRelay(relay1, true);  bot.sendMessage(chat_id, "Relay 1 ON",  ""); }
-    else if (text == "/r1_off") { setRelay(relay1, false); bot.sendMessage(chat_id, "Relay 1 OFF", ""); }
+    else if (text == "/r1_on")  { setRelay(relay1, true);  updateWebRelay("/relay/1/on"); bot.sendMessage(chat_id, "Relay 1 ON",  ""); }
+    else if (text == "/r1_off") { setRelay(relay1, false); updateWebRelay("/relay/1/off"); bot.sendMessage(chat_id, "Relay 1 OFF", ""); }
     // RELAY 2
-    else if (text == "/r2_on")  { setRelay(relay2, true);  bot.sendMessage(chat_id, "Relay 2 ON",  ""); }
-    else if (text == "/r2_off") { setRelay(relay2, false); bot.sendMessage(chat_id, "Relay 2 OFF", ""); }
+    else if (text == "/r2_on")  { setRelay(relay2, true);  updateWebRelay("/relay/2/on"); bot.sendMessage(chat_id, "Relay 2 ON",  ""); }
+    else if (text == "/r2_off") { setRelay(relay2, false); updateWebRelay("/relay/2/off"); bot.sendMessage(chat_id, "Relay 2 OFF", ""); }
     // RELAY 3
-    else if (text == "/r3_on")  { setRelay(relay3, true);  bot.sendMessage(chat_id, "Relay 3 ON",  ""); }
-    else if (text == "/r3_off") { setRelay(relay3, false); bot.sendMessage(chat_id, "Relay 3 OFF", ""); }
+    else if (text == "/r3_on")  { setRelay(relay3, true);  updateWebRelay("/relay/3/on"); bot.sendMessage(chat_id, "Relay 3 ON",  ""); }
+    else if (text == "/r3_off") { setRelay(relay3, false); updateWebRelay("/relay/3/off"); bot.sendMessage(chat_id, "Relay 3 OFF", ""); }
     // RELAY 4
-    else if (text == "/r4_on")  { setRelay(relay4, true);  bot.sendMessage(chat_id, "Relay 4 ON",  ""); }
-    else if (text == "/r4_off") { setRelay(relay4, false); bot.sendMessage(chat_id, "Relay 4 OFF", ""); }
+    else if (text == "/r4_on")  { setRelay(relay4, true);  updateWebRelay("/relay/4/on"); bot.sendMessage(chat_id, "Relay 4 ON",  ""); }
+    else if (text == "/r4_off") { setRelay(relay4, false); updateWebRelay("/relay/4/off"); bot.sendMessage(chat_id, "Relay 4 OFF", ""); }
     // ALL ON/OFF
     else if (text == "/all_on") {
       setRelay(relay1, true); setRelay(relay2, true); setRelay(relay3, true); setRelay(relay4, true);
+      updateWebRelay("/relay/all/on");
       bot.sendMessage(chat_id, "Semua Relay ON", "");
     }
     else if (text == "/all_off") {
       setRelay(relay1, false); setRelay(relay2, false); setRelay(relay3, false); setRelay(relay4, false);
+      updateWebRelay("/relay/all/off");
       bot.sendMessage(chat_id, "Semua Relay OFF", "");
     }
     // STATUS
