@@ -44,6 +44,7 @@ let dbData = loadState();
 let relayState = dbData.state || (dbData.relays ? [...dbData.relays] : [false, false, false, false]);
 let relayRequest = dbData.request || (dbData.relays ? [...dbData.relays] : [false, false, false, false]);
 let hasRequest = dbData.hasRequest || false;
+let activeVariasi = dbData.variasi || 0;
 
 let lastUpdated = Date.now();
 let currentTemp = 28.5;
@@ -141,8 +142,10 @@ const relayHandler = async (req, res) => {
   if (idStr === 'all') {
     const isON = (stateStr === 'on');
     relayRequest = [isON, isON, isON, isON];
+    relayState = [isON, isON, isON, isON]; // Mock directly for UI
     hasRequest = true;
-    saveState({ state: relayState, request: relayRequest, hasRequest });
+    activeVariasi = 0; // stop variasi when manually turning all on/off
+    saveState({ state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
     
     return res.json({
       success: true,
@@ -158,10 +161,12 @@ const relayHandler = async (req, res) => {
   if (idx >= 0 && idx < 4) {
     const isON = (stateStr === 'on');
     relayRequest[idx] = isON;
+    relayState[idx] = isON; // Mock directly for UI
     hasRequest = true;
-    saveState({ state: relayState, request: relayRequest, hasRequest });
+    activeVariasi = 0; // stop variasi when manually turning on/off
+    saveState({ state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
     
-    const labels = ['Lampu Teras', 'Lampu Tengah', 'Variasi 1', 'Variasi 2'];
+    const labels = ['Lampu Kamar Tidur', 'Lampu Kamar Mandi', 'Lampu Dapur', 'Lampu Teras'];
     return res.json({
       success: true,
       relay: idx + 1,
@@ -179,11 +184,11 @@ app.get('/relay/:id/:state', relayHandler);
 
 // get all relays status
 const relaysHandler = (req, res) => {
-  res.json({ relays: relayState, state: relayState, request: relayRequest, hasRequest });
+  res.json({ relays: relayState, state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
 };
 
 const updateRelaysHandler = (req, res) => {
-  const { relays: newRelays, state: newState, request: newRequest, hasRequest: newHasRequest } = req.body || {};
+  const { relays: newRelays, state: newState, request: newRequest, hasRequest: newHasRequest, variasi: newVariasi } = req.body || {};
   
   if (Array.isArray(newState)) {
     relayState = newState;
@@ -198,10 +203,29 @@ const updateRelaysHandler = (req, res) => {
   if (newHasRequest !== undefined) {
     hasRequest = newHasRequest;
   }
+  
+  if (newVariasi !== undefined) {
+    activeVariasi = newVariasi;
+  }
 
-  saveState({ state: relayState, request: relayRequest, hasRequest });
-  res.json({ success: true, relays: relayState, state: relayState, request: relayRequest, hasRequest });
+  saveState({ state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
+  res.json({ success: true, relays: relayState, state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
 };
+
+const variasiHandler = (req, res) => {
+  const v = parseInt(req.params.id);
+  if (v >= 0 && v <= 2) {
+    activeVariasi = v;
+    // When activating variasi, we don't necessarily set hasRequest. The ESP will check variasi directly.
+    saveState({ state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
+    res.json({ success: true, variasi: activeVariasi });
+  } else {
+    res.status(400).json({ success: false, message: 'Invalid Variasi ID' });
+  }
+};
+
+app.get('/api/variasi/:id', variasiHandler);
+app.get('/variasi/:id', variasiHandler);
 
 app.get('/api/relays', relaysHandler);
 app.get('/relays', relaysHandler);

@@ -1,7 +1,8 @@
 const app = {
     chart: null,
     relays: [false, false, false, false],
-    labels: ['Lampu Teras', 'Lampu Tengah', 'Variasi 1', 'Variasi 2'],
+    activeVariasi: 0,
+    labels: ['Lampu Kamar Tidur', 'Lampu Kamar Mandi', 'Lampu Dapur', 'Lampu Teras'],
     gpios: ['05', '19', '18', '23'],
     
     init() {
@@ -145,6 +146,12 @@ const app = {
                 throw new TypeError("Received non-JSON response");
             }
             const data = await res.json();
+            
+            if (data.variasi !== undefined && data.variasi !== this.activeVariasi) {
+                this.activeVariasi = data.variasi;
+                this.renderVariasiButtons();
+            }
+
             if(data.relays) {
                 if (JSON.stringify(this.relays) !== JSON.stringify(data.relays)) {
                     this.relays = data.relays;
@@ -154,6 +161,23 @@ const app = {
         } catch (err) {
             console.error("Error fetching relay status:", err.message || err);
         }
+    },
+
+    renderVariasiButtons() {
+        ['btn-var1', 'btn-var2', 'btn-var0'].forEach((id, index) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            // mapping index: btn-var1(0) -> var 1, btn-var2(1) -> var 2, btn-var0(2) -> var 0
+            const v = index === 0 ? 1 : index === 1 ? 2 : 0;
+            if (v === this.activeVariasi) {
+                el.classList.add('ring-2', 'ring-offset-2', 'ring-offset-[#16191D]');
+                if (v === 1) el.classList.add('ring-[#00A8E8]');
+                if (v === 2) el.classList.add('ring-[#8A2BE2]');
+                if (v === 0) el.classList.add('ring-[#3A3D41]');
+            } else {
+                el.classList.remove('ring-2', 'ring-offset-2', 'ring-offset-[#16191D]', 'ring-[#00A8E8]', 'ring-[#8A2BE2]', 'ring-[#3A3D41]');
+            }
+        });
     },
 
     renderRelays() {
@@ -232,6 +256,77 @@ const app = {
         }
     },
 
+    async setVariasi(id) {
+        this.showToast(id === 0 ? `Menghentikan Variasi...` : `Menyalakan Variasi ${id}...`, 'info');
+        try {
+            const res = await fetch(`/api/variasi/${id}`);
+            if (res.ok) {
+                this.addLog(id === 0 ? `Stop Variasi` : `Variasi ${id} diaktifkan`);
+                this.fetchRelayStatus();
+            }
+        } catch (err) {
+            this.showToast('Gagal mengubah variasi', 'error');
+        }
+    },
+    
+    startVoice() {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            this.showToast('Maaf, browser Anda tidak mendukung fitur Voice Command', 'error');
+            return;
+        }
+        
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'id-ID';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        
+        const btn = document.getElementById('btn-voice');
+        if (btn) {
+            btn.classList.add('animate-pulse', 'bg-[#00FF41]/40');
+        }
+        
+        this.showToast('Silakan bicara sekarang...', 'info');
+        
+        recognition.start();
+        
+        recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript.toLowerCase().trim();
+            this.showToast(`Mendengar: "${transcript}"`, 'info');
+            this.addLog(`Mendengar: "${transcript}"`);
+            this.processVoiceCommand(transcript);
+        };
+        
+        recognition.onspeechend = () => {
+            recognition.stop();
+        };
+        
+        recognition.onend = () => {
+            if (btn) btn.classList.remove('animate-pulse', 'bg-[#00FF41]/40');
+        };
+        
+        recognition.onerror = (event) => {
+            this.showToast(`Error pengenalan suara: ${event.error}`, 'error');
+        };
+    },
+    
+    processVoiceCommand(text) {
+        if (text.includes('nyalakan lampu kamar tidur') || text.includes('hidupkan lampu kamar tidur') || text.includes('nyalakan lampu 1')) { this.toggleRelay(1, 'on'); }
+        else if (text.includes('matikan lampu kamar tidur') || text.includes('matikan lampu 1')) { this.toggleRelay(1, 'off'); }
+        else if (text.includes('nyalakan lampu kamar mandi') || text.includes('hidupkan lampu kamar mandi') || text.includes('nyalakan lampu 2')) { this.toggleRelay(2, 'on'); }
+        else if (text.includes('matikan lampu kamar mandi') || text.includes('matikan lampu 2')) { this.toggleRelay(2, 'off'); }
+        else if (text.includes('nyalakan lampu dapur') || text.includes('hidupkan lampu dapur') || text.includes('nyalakan lampu 3')) { this.toggleRelay(3, 'on'); }
+        else if (text.includes('matikan lampu dapur') || text.includes('matikan lampu 3')) { this.toggleRelay(3, 'off'); }
+        else if (text.includes('nyalakan lampu teras') || text.includes('hidupkan lampu teras') || text.includes('nyalakan lampu 4')) { this.toggleRelay(4, 'on'); }
+        else if (text.includes('matikan lampu teras') || text.includes('matikan lampu 4')) { this.toggleRelay(4, 'off'); }
+        else if (text.includes('nyalakan semua lampu') || text.includes('semua lampu nyala') || text.includes('hidupkan lampu') || text.includes('nyalakan lampu')) { this.setAllRelays(true); }
+        else if (text.includes('matikan semua lampu') || text.includes('semua lampu mati') || text.includes('matikan lampu') || text.includes('lampu mati')) { this.setAllRelays(false); }
+        else if (text.includes('variasi satu') || text.includes('variasi 1')) { this.setVariasi(1); }
+        else if (text.includes('variasi dua') || text.includes('variasi 2')) { this.setVariasi(2); }
+        else if (text.includes('matikan variasi') || text.includes('stop variasi')) { this.setVariasi(0); }
+        else { this.showToast('Perintah suara tidak dikenali', 'error'); }
+    },
+
     addLog(msg) {
         const container = document.getElementById('log-container');
         if (!container) return;
@@ -247,8 +342,7 @@ const app = {
         
         container.prepend(log);
         
-        // Keep max 50 logs
-        if (container.children.length > 50) {
+        while (container.children.length > 10) {
             container.removeChild(container.lastChild);
         }
     },
