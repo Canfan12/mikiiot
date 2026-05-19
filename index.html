@@ -76,26 +76,20 @@
                 <!-- Data Sensors (Temp / Hum) -->
                 <div class="flex flex-col sm:flex-row gap-4 w-full">
                     <!-- Temperature Card -->
-                    <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-4 flex items-center justify-between flex-1 relative overflow-hidden shadow-2xl h-[90px]">
+                    <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-lg px-4 py-3 flex items-center shadow-2xl relative overflow-hidden flex-1">
                         <div class="absolute top-0 right-0 w-24 h-24 bg-[#FF4B2B]/5 rounded-full blur-2xl"></div>
-                        <div class="flex items-center gap-3 relative z-10">
-                            <i class="ph ph-thermometer text-[#FF4B2B] text-xl"></i>
-                            <p class="text-[10px] sm:text-[11px] uppercase text-[#8E9299] tracking-wider font-bold">Temperature</p>
-                        </div>
-                        <div class="relative z-10 text-right">
-                            <h3 class="text-xl sm:text-2xl font-light text-white tracking-tight"><span id="temp-val">--</span><span class="text-sm text-[#8E9299] ml-1">°C</span></h3>
+                        <div class="flex items-center justify-center sm:justify-start gap-2 relative z-10 w-full">
+                            <i class="ph ph-thermometer text-[#FF4B2B] text-lg"></i>
+                            <span class="text-[10px] sm:text-xs uppercase text-[#8E9299] tracking-widest font-bold leading-none mt-0.5">Temperature : <span id="temp-val" class="text-white text-xs sm:text-sm ml-1 font-mono">--</span> °C</span>
                         </div>
                     </div>
 
                     <!-- Humidity Card -->
-                    <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-xl p-4 flex items-center justify-between flex-1 relative overflow-hidden shadow-2xl h-[90px]">
+                    <div class="bg-[#16191D]/80 backdrop-blur-md border border-[#2A2D31] rounded-lg px-4 py-3 flex items-center shadow-2xl relative overflow-hidden flex-1">
                         <div class="absolute bottom-0 left-0 w-24 h-24 bg-[#00A8E8]/5 rounded-full blur-2xl"></div>
-                        <div class="flex items-center gap-3 relative z-10">
-                            <i class="ph ph-drop text-[#00A8E8] text-xl"></i>
-                            <p class="text-[10px] sm:text-[11px] uppercase text-[#8E9299] tracking-wider font-bold">Humidity</p>
-                        </div>
-                        <div class="relative z-10 text-right">
-                            <h3 class="text-xl sm:text-2xl font-light text-white tracking-tight"><span id="hum-val">--</span><span class="text-sm text-[#8E9299] ml-1">%</span></h3>
+                        <div class="flex items-center justify-center sm:justify-start gap-2 relative z-10 w-full">
+                            <i class="ph ph-drop text-[#00A8E8] text-lg"></i>
+                            <span class="text-[10px] sm:text-xs uppercase text-[#8E9299] tracking-widest font-bold leading-none mt-0.5">Humidity : <span id="hum-val" class="text-white text-xs sm:text-sm ml-1 font-mono">--</span> %</span>
                         </div>
                     </div>
                 </div>
