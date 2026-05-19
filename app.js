@@ -150,9 +150,10 @@ const app = {
             if (data.variasi !== undefined && data.variasi !== this.activeVariasi) {
                 this.activeVariasi = data.variasi;
                 this.renderVariasiButtons();
+                this.handleVariasiAnimation();
             }
 
-            if(data.relays) {
+            if(data.relays && this.activeVariasi === 0) {
                 if (JSON.stringify(this.relays) !== JSON.stringify(data.relays)) {
                     this.relays = data.relays;
                     this.renderRelays();
@@ -160,6 +161,36 @@ const app = {
             }
         } catch (err) {
             console.error("Error fetching relay status:", err.message || err);
+        }
+    },
+
+    handleVariasiAnimation() {
+        if (this.variasiInterval) {
+            clearInterval(this.variasiInterval);
+            this.variasiInterval = null;
+        }
+        
+        if (this.activeVariasi === 1) {
+            let step = 0;
+            this.variasiInterval = setInterval(() => {
+                this.relays = step % 2 === 0 ? [true, false, true, false] : [false, true, false, true];
+                this.renderRelays();
+                step++;
+            }, 500);
+        } else if (this.activeVariasi === 2) {
+            let step = 0;
+            this.variasiInterval = setInterval(() => {
+                const pat = step % 4;
+                if (pat === 0) this.relays = [true, false, false, false];
+                else if (pat === 1) this.relays = [true, true, false, false];
+                else if (pat === 2) this.relays = [true, true, true, false];
+                else this.relays = [true, true, true, true];
+                this.renderRelays();
+                step++;
+            }, 400);
+        } else if (this.activeVariasi === 0) {
+            // Restore actual status from server
+            this.fetchRelayStatus();
         }
     },
 
