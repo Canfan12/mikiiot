@@ -176,18 +176,18 @@ const app = {
                 this.relays = step % 2 === 0 ? [true, false, true, false] : [false, true, false, true];
                 this.renderRelays();
                 step++;
-            }, 500);
+            }, 1000);
         } else if (this.activeVariasi === 2) {
             let step = 0;
             this.variasiInterval = setInterval(() => {
                 const pat = step % 4;
                 if (pat === 0) this.relays = [true, false, false, false];
-                else if (pat === 1) this.relays = [true, true, false, false];
-                else if (pat === 2) this.relays = [true, true, true, false];
-                else this.relays = [true, true, true, true];
+                else if (pat === 1) this.relays = [false, true, false, false];
+                else if (pat === 2) this.relays = [false, false, true, false];
+                else this.relays = [false, false, false, true];
                 this.renderRelays();
                 step++;
-            }, 400);
+            }, 1000);
         } else if (this.activeVariasi === 0) {
             // Restore actual status from server
             this.fetchRelayStatus();
