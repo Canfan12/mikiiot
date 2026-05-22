@@ -79,7 +79,7 @@ int activeVariasi = 0; // 0 = stop, 1 = kedip, 2 = running
 int variasiStep   = 0;
 unsigned long lastVariasiTime = 0;
 const unsigned long VARIASI1_SPEED = 500;
-const unsigned long VARIASI2_SPEED = 300;
+const unsigned long VARIASI2_SPEED = 500;
 
 // ================= TIMER =================
 const unsigned long botDelay = 1000;
