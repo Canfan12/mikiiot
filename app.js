@@ -176,7 +176,7 @@ const app = {
                 this.relays = step % 2 === 0 ? [true, false, true, false] : [false, true, false, true];
                 this.renderRelays();
                 step++;
-            }, 100);
+            }, 500);
         } else if (this.activeVariasi === 2) {
             let step = 0;
             this.variasiInterval = setInterval(() => {
@@ -187,7 +187,7 @@ const app = {
                 else this.relays = [false, false, false, true];
                 this.renderRelays();
                 step++;
-            }, 100);
+            }, 500);
         } else if (this.activeVariasi === 0) {
             // Restore actual status from server
             this.fetchRelayStatus();
