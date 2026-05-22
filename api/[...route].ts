@@ -216,6 +216,11 @@ const variasiHandler = (req, res) => {
   const v = parseInt(req.params.id);
   if (v >= 0 && v <= 2) {
     activeVariasi = v;
+    if (v === 0) {
+      relayState = [false, false, false, false];
+      relayRequest = [false, false, false, false];
+      hasRequest = true;
+    }
     // When activating variasi, we don't necessarily set hasRequest. The ESP will check variasi directly.
     saveState({ state: relayState, request: relayRequest, hasRequest, variasi: activeVariasi });
     res.json({ success: true, variasi: activeVariasi });

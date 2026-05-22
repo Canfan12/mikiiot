@@ -51,8 +51,8 @@ const unsigned long VARIASI1_SPEED = 500;
 const unsigned long VARIASI2_SPEED = 500;
 
 // ================= TIMER - SEMUA DIPERCEPAT =================
-const unsigned long BOT_DELAY      = 500;   // Telegram polling tiap 500ms (default 1000)
-const unsigned long WEB_DELAY      = 1000;  // Web polling tiap 1 detik (default 2000)
+const unsigned long BOT_DELAY      = 100;   // Telegram polling tiap 500ms (default 1000)
+const unsigned long WEB_DELAY      = 100;  // Web polling tiap 1 detik (default 2000)
 const unsigned long DHT_DELAY      = 5000;  // Push DHT tiap 5 detik
 const unsigned long DHT_READ_DELAY = 2000;  // Baca DHT lokal tiap 2 detik
 const unsigned long POST_COOLDOWN  = 500;   // Cooldown POST (default 2000-3000)
@@ -513,8 +513,8 @@ void loop() {
   // 4. Push DHT ke web (5 detik)
   pushDhtKeWeb();
 
-  // 5. Polling web (1 detik, skip jika variasi aktif)
-  if (now - lastWebTime >= WEB_DELAY && activeVariasi == 0) {
+  // 5. Polling web
+  if (now - lastWebTime >= WEB_DELAY) {
     cekRequestDariWeb();
     lastWebTime = now;
   }
