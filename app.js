@@ -100,7 +100,7 @@ const app = {
                 document.getElementById('hum-val').innerText = parseFloat(latest.humidity).toFixed(0);
             }
         } catch (err) {
-            console.error("Error fetching history:", err);
+            console.warn("Error fetching history:", err.message || err);
         }
     },
 
@@ -134,7 +134,7 @@ const app = {
         } catch (err) {
             this.setSyncStatus('Offline', false);
             this.setConnectionStatus(false);
-            console.error("Error fetching DHT data:", err);
+            console.warn("Error fetching DHT data:", err.message || err);
         }
     },
 
@@ -160,7 +160,7 @@ const app = {
                 }
             }
         } catch (err) {
-            console.error("Error fetching relay status:", err.message || err);
+            console.warn("Error fetching relay status:", err.message || err);
         }
     },
 
